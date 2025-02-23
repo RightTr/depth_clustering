@@ -104,17 +104,16 @@ Cloud::Ptr Cloud::FromImage(const cv::Mat& image,
 
 typename pcl::PointCloud<pcl::PointXYZL>::Ptr Cloud::ToPcl() const {
   using pcl::PointXYZL;
-  using PclCloud = pcl::PointCloud<PointXYZL>;
-  PclCloud pcl_cloud;
+  pcl::PointCloud<PointXYZL>::Ptr pcl_cloud;
   for (const auto& point : _points) {
     PointXYZL pcl_point;
     pcl_point.x = point.x();
     pcl_point.y = point.y();
     pcl_point.z = point.z();
     pcl_point.label = point.ring();
-    pcl_cloud.push_back(pcl_point);
+    pcl_cloud->push_back(pcl_point);
   }
-  return make_shared<PclCloud>(pcl_cloud);
+  return pcl_cloud;
 }
 
 template <>

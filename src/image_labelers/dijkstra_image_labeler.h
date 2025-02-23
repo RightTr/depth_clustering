@@ -21,8 +21,8 @@
 #ifndef SRC_IMAGE_LABELERS_DIJKSTRA_IMAGE_LABELER_H_
 #define SRC_IMAGE_LABELERS_DIJKSTRA_IMAGE_LABELER_H_
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
 
 #include <string>
 #include <queue>
