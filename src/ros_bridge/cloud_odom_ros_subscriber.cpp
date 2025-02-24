@@ -160,4 +160,11 @@ Cloud::Ptr CloudOdomRosSubscriber::RosCloudToCloud(
   return make_shared<Cloud>(cloud);
 }
 
+void CloudOdomRosSubscriber::CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud) //TODO:CallbackLivox
+{
+  Cloud::Ptr cloud_ptr = RosCloudToCloud(msg_cloud);
+  cloud_ptr->InitProjection(_params);
+  ShareDataWithAllClients(*cloud_ptr);
+}
+
 }  // namespace depth_clustering

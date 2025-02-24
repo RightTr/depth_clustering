@@ -19,6 +19,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 #include "projections/ring_projection.h"
+#include "projections/spherical_projection.h"
 
 #include <vector>
 
@@ -26,7 +27,7 @@
 
 namespace depth_clustering {
 
-void RingProjection::InitFromPoints(const RichPoint::AlignedVector& points) {
+void RingProjection::InitFromPoints(const RichPoint::AlignedVector& points) { //TODO::InitFromPoints
   fprintf(stderr, "Projecting cloud with %lu points\n", points.size());
   time_utils::Timer timer;
   this->CheckCloudAndStorage(points);

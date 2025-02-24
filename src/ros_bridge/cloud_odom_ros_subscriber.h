@@ -48,6 +48,7 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
       message_filters::sync_policies::ApproximateTime<PointCloudT, OdometryT>;
 
  public:
+  CloudOdomRosSubscriber(){}
   CloudOdomRosSubscriber(ros::NodeHandle* node_handle,
                          const ProjectionParams& params,
                          const std::string& topic_clouds,
@@ -73,6 +74,8 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
    * @param[in]  msg_cloud  The message cloud
    */
   void CallbackVelodyne(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud);
+
+  void CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud);
 
   /**
    * @brief      Starts listening to ros.
