@@ -196,6 +196,9 @@ class ProjectionParams {
    *
    * @return     A pointer to parameters
    */
+
+  static std::unique_ptr<ProjectionParams> MID_360(); //TODO::MID_360 params declared
+  
   static std::unique_ptr<ProjectionParams> FromConfigFile(
       const std::string& path);
   /**
@@ -205,6 +208,8 @@ class ProjectionParams {
    */
   static std::unique_ptr<ProjectionParams> FullSphere(
       const Radians& discretization = 5_deg);
+  
+
 
  private:
   std::vector<Radians> FillVector(const SpanParams& span_params);

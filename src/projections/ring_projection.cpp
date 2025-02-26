@@ -32,6 +32,7 @@ void RingProjection::InitFromPoints(const RichPoint::AlignedVector& points) { //
   time_utils::Timer timer;
   this->CheckCloudAndStorage(points);
   // share ownership of input cloud
+  std::cout << "Use RingProjection" << std::endl;
   for (size_t index = 0; index < points.size(); ++index) {
     const auto& point = points[index];
     float dist_to_sensor = point.DistToSensor2D();

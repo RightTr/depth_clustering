@@ -82,7 +82,7 @@ CloudOdomRosSubscriber::CloudOdomRosSubscriber(NodeHandle* node_handle,
                                                const ProjectionParams& params,
                                                const string& topic_clouds,
                                                const string& topic_odom)
-    : AbstractSender{SenderType::STREAMER}, _params{params} {
+    : AbstractSender{SenderType::STREAMER}, _params{params} { //TODO: Input params
   _node_handle = node_handle;
   _topic_clouds = topic_clouds;
   _topic_odom = topic_odom;
@@ -93,8 +93,10 @@ CloudOdomRosSubscriber::CloudOdomRosSubscriber(NodeHandle* node_handle,
   _sync = nullptr;
 }
 
-void CloudOdomRosSubscriber::StartListeningToRos() {
-  if (!_topic_odom.empty()) {
+void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar) 
+{
+  if (!_topic_odom.empty()) 
+  {
     _subscriber_clouds = new Subscriber<PointCloud2>(
         *_node_handle, _topic_clouds, _msg_queue_size);
     _subscriber_odom =
@@ -103,11 +105,21 @@ void CloudOdomRosSubscriber::StartListeningToRos() {
         ApproximateTimePolicy(100), *_subscriber_clouds, *_subscriber_odom);
     _sync->registerCallback(
         boost::bind(&CloudOdomRosSubscriber::Callback, this, _1, _2));
-  } else {
+  } 
+  else 
+  {
     _subscriber_clouds = new Subscriber<PointCloud2>(
         *_node_handle, _topic_clouds, _msg_queue_size);
-    _subscriber_clouds->registerCallback(
-        &CloudOdomRosSubscriber::CallbackVelodyne, this);
+    if(mylidar == "velodyne")
+    {
+      _subscriber_clouds->registerCallback(
+          &CloudOdomRosSubscriber::CallbackVelodyne, this);
+    }
+    else if(mylidar == "livox")
+    {
+      _subscriber_clouds->registerCallback(
+      &CloudOdomRosSubscriber::CallbackLivox, this);
+    }
   }
 }
 
@@ -120,7 +132,7 @@ void CloudOdomRosSubscriber::Callback(const PointCloud2::ConstPtr& msg_cloud,
   ShareDataWithAllClients(*cloud_ptr);
 }
 
-void CloudOdomRosSubscriber::CallbackVelodyne(
+void CloudOdomRosSubscriber::CallbackVelodyne( //TODO:CallbackVelodyne
     const PointCloud2::ConstPtr& msg_cloud) {
   // PrintMsgStats(msg_cloud);
   Cloud::Ptr cloud_ptr = RosCloudToCloud(msg_cloud);

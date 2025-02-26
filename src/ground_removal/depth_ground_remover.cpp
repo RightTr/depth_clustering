@@ -23,6 +23,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include <algorithm>
+#include <iostream>
 
 #include "image_labelers/diff_helpers/angle_diff.h"
 #include "image_labelers/diff_helpers/simple_diff.h"
@@ -40,9 +41,10 @@ using time_utils::Timer;
 const cv::Point ANCHOR_CENTER = cv::Point(-1, -1);
 const int SAME_OUTPUT_TYPE = -1;
 
-void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int) {
+void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int) { //TODO:DepthGroundRemover::OnNewObjectReceived
   // this can be done even faster if we switch to column-major implementation
   // thus allowing us to load whole row in L1 cache
+  // std::cout << "Use OnNewObjectReceived" << std::endl;
   if (!cloud.projection_ptr()) {
     fprintf(stderr, "No projection in cloud. Skipping ground removal.\n");
     return;
@@ -56,7 +58,7 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int) {
   auto no_ground_image = ZeroOutGroundBFS(depth_image, smoothed_image,
                                           _ground_remove_angle, _window_size);
   fprintf(stderr, "INFO: Ground removed in %lu us\n", total_timer.measure());
-  cloud_copy.projection_ptr()->depth_image() = no_ground_image;
+  cloud_copy.projection_ptr()->depth_image() = no_ground_image; //Remove ground
   this->ShareDataWithAllClients(cloud_copy);
   _counter++;
 }

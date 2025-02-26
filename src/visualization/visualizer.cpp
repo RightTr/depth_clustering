@@ -80,7 +80,7 @@ void Visualizer::DrawCloud(const Cloud& cloud) {
   glPopMatrix();
 }
 
-void Visualizer::DrawCube(const Eigen::Vector3f& center,
+void Visualizer::DrawCube(const Eigen::Vector3f& center, //Box
                           const Eigen::Vector3f& scale) {
   glPushMatrix();
   glTranslatef(center.x(), center.y(), center.z());

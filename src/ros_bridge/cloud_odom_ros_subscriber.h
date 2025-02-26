@@ -75,12 +75,12 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
    */
   void CallbackVelodyne(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud);
 
-  void CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud);
-
   /**
    * @brief      Starts listening to ros.
    */
-  void StartListeningToRos();
+  void StartListeningToRos(const std::string mylidar);
+
+  void CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud);
 
  protected:
   Pose RosOdomToPose(const OdometryT::ConstPtr& msg);

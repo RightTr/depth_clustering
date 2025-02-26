@@ -38,46 +38,69 @@ using std::string;
 using namespace depth_clustering;
 
 int main(int argc, char* argv[]) {
-  TCLAP::CmdLine cmd(
-      "Subscribe to /velodyne_points topic and save clusters to disc.", ' ',
-      "1.0");
+   TCLAP::CmdLine cmd(
+      "Subscribe to /velodyne_points topic and show clustering on the data.",
+      ' ', "1.0");
+  TCLAP::ValueArg<std::string> lidar_arg(
+    "", "lidar",
+    "Choose your lidar type(livox or velodyne)", true, "velodyne",
+    "string");
   TCLAP::ValueArg<int> angle_arg(
       "", "angle",
       "Threshold angle. Below this value, the objects are separated", false, 10,
       "int");
-  TCLAP::ValueArg<int> num_beams_arg(
-      "", "num_beams", "Num of vertical beams in laser. One of: [16, 32, 64].",
-      true, 0, "int");
+  TCLAP::ValueArg<int> type_arg(
+  "", "type", "For Velodyne, num of vertical beams in laser. One of: [16, 32, 64]. For Livox ,type of livox lidar. One of: [360, ...]",
+  true, 0, "int");
+
 
   cmd.add(angle_arg);
-  cmd.add(num_beams_arg);
+  cmd.add(lidar_arg);
+  cmd.add(type_arg);
   cmd.parse(argc, argv);
+  std::unique_ptr<ProjectionParams> proj_params_ptr = nullptr;
 
   Radians angle_tollerance = Radians::FromDegrees(angle_arg.getValue());
+  std::string mylidar = lidar_arg.getValue();;
 
-  std::unique_ptr<ProjectionParams> proj_params_ptr = nullptr;
-  switch (num_beams_arg.getValue()) {
-    case 16:
-      proj_params_ptr = ProjectionParams::VLP_16();
-      break;
-    case 32:
-      proj_params_ptr = ProjectionParams::HDL_32();
-      break;
-    case 64:
-      proj_params_ptr = ProjectionParams::HDL_64();
-      break;
+  std::string topic_clouds;
+
+  if(mylidar == "velodyne")
+  {
+    topic_clouds = "/velodyne_points";
+    switch (type_arg.getValue()) 
+    {
+      case 16:
+        proj_params_ptr = ProjectionParams::VLP_16();
+        break;
+      case 32:
+        proj_params_ptr = ProjectionParams::HDL_32();
+        break;
+      case 64:
+        proj_params_ptr = ProjectionParams::HDL_64();
+        break;
   }
+  }
+  else if(mylidar == "livox")
+  {
+    topic_clouds = "/livox/lidar";
+    switch (type_arg.getValue()) 
+    {
+      case 360:
+        proj_params_ptr = ProjectionParams::MID_360();
+        break;
+    }
+  }
+
   if (!proj_params_ptr) {
     fprintf(stderr,
-            "ERROR: wrong number of beams: %d. Should be in [16, 32, 64].\n",
-            num_beams_arg.getValue());
+            "Params Error!");
     exit(1);
   }
 
   ros::init(argc, argv, "dynamics_processing");
   ros::NodeHandle nh;
 
-  string topic_clouds = "/velodyne_points";
 
   CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds);
 
@@ -105,7 +128,7 @@ int main(int argc, char* argv[]) {
   fprintf(stderr, "Running with angle tollerance: %f degrees\n",
           angle_tollerance.ToDegrees());
 
-  subscriber.StartListeningToRos();
+  subscriber.StartListeningToRos(mylidar);
   ros::spin();
   return 0;
 }

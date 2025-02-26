@@ -132,7 +132,7 @@ class Radians {
 
 }  // namespace depth_clustering
 
-constexpr depth_clustering::Radians operator"" _rad(long double angle) {
+constexpr depth_clustering::Radians operator"" _rad(long double angle) { //TODO:_deg
   return depth_clustering::Radians{depth_clustering::Radians::IsRadians{},
                                    static_cast<float>(angle)};
 }

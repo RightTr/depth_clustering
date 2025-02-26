@@ -21,12 +21,14 @@
 #include "projections/spherical_projection.h"
 
 #include <vector>
+#include <iostream>
 
 namespace depth_clustering {
 
 void SphericalProjection::InitFromPoints(
     const RichPoint::AlignedVector& points) {
   this->CheckCloudAndStorage(points);
+  // std::cout << "Use SphericalProjection" << std::endl;
   for (size_t index = 0; index < points.size(); ++index) {
     const auto& point = points[index];
     float dist_to_sensor = point.DistToSensor3D();
@@ -39,9 +41,9 @@ void SphericalProjection::InitFromPoints(
     size_t bin_cols = this->_params.ColFromAngle(angle_cols);
     // adding point pointer
     this->at(bin_rows, bin_cols).points().push_back(index);
-    auto& current_written_depth =
+    auto& current_written_depth = //TODO:Depth input depth image
         this->_depth_image.template at<float>(bin_rows, bin_cols);
-    if (current_written_depth < dist_to_sensor) {
+    if (current_written_depth < dist_to_sensor) { 
       // write this point to the image only if it is closer
       current_written_depth = dist_to_sensor;
     }

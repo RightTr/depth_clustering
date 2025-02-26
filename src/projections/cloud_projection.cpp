@@ -21,6 +21,7 @@
 #include "projections/cloud_projection.h"
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "utils/mem_utils.h"
 
@@ -30,7 +31,7 @@ using mem_utils::make_unique;
 
 CloudProjection::PointContainer::PointContainer() {}
 
-CloudProjection::CloudProjection(const ProjectionParams& params)
+CloudProjection::CloudProjection(const ProjectionParams& params) //TODO:Class CloudProjection&&PointMatrix
     : _params(params) {
   if (!_params.valid()) {
     throw std::runtime_error("_params not valid for projection.");
@@ -38,6 +39,7 @@ CloudProjection::CloudProjection(const ProjectionParams& params)
   _data = PointMatrix(_params.cols(), PointColumn(_params.rows()));
   _depth_image =
       cv::Mat::zeros(_params.rows(), _params.cols(), cv::DataType<float>::type);
+  std::cout << "_depth_image size:" << _depth_image.size() << std::endl;
 }
 
 RichPoint CloudProjection::UnprojectPoint(const cv::Mat& image, const int row,

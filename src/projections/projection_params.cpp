@@ -27,6 +27,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "utils/mem_utils.h"
 
@@ -44,7 +45,7 @@ void ProjectionParams::SetSpan(const SpanParams& span_params,
 }
 
 void ProjectionParams::SetSpan(const vector<SpanParams>& span_params,
-                               const SpanParams::Direction& direction) {
+                               const SpanParams::Direction& direction) { //TODO:_col_angles&&_row_angles
   int num_beams = 0;
   for (const auto& span : span_params) {
     num_beams += span.num_beams();
@@ -54,6 +55,7 @@ void ProjectionParams::SetSpan(const vector<SpanParams>& span_params,
       _h_span_params = SpanParams(span_params.front().start_angle(),
                                   span_params.back().end_angle(), num_beams);
       _col_angles = FillVector(span_params);
+      
       break;
     case SpanParams::Direction::VERTICAL:
       _v_span_params = SpanParams(span_params.front().start_angle(),
@@ -64,7 +66,7 @@ void ProjectionParams::SetSpan(const vector<SpanParams>& span_params,
   FillCosSin();
 }
 
-vector<Radians> ProjectionParams::FillVector(const SpanParams& span_params) {
+vector<Radians> ProjectionParams::FillVector(const SpanParams& span_params) { 
   vector<SpanParams> params_vec = {{span_params}};
   return this->FillVector(params_vec);
 }
@@ -83,11 +85,11 @@ vector<Radians> ProjectionParams::FillVector(
 }
 
 bool ProjectionParams::valid() {
-  bool all_params_valid = _v_span_params.valid() && _h_span_params.valid();
-  bool arrays_empty = _row_angles.empty() && _col_angles.empty();
-  bool cos_sin_empty = _row_angles_sines.empty() &&
-                       _row_angles_cosines.empty() &&
-                       _col_angles_sines.empty() && _col_angles_cosines.empty();
+bool all_params_valid = _v_span_params.valid() && _h_span_params.valid();
+bool arrays_empty = _row_angles.empty() && _col_angles.empty();
+bool cos_sin_empty = _row_angles_sines.empty() &&
+                      _row_angles_cosines.empty() &&
+                      _col_angles_sines.empty() && _col_angles_cosines.empty();
   if (!all_params_valid) {
     throw std::runtime_error("Projection parameters invalid.");
   }
@@ -128,7 +130,7 @@ size_t ProjectionParams::ColFromAngle(const Radians& angle) const {
   return FindClosest(_col_angles, angle);
 }
 
-size_t ProjectionParams::FindClosest(const vector<Radians>& vec,
+size_t ProjectionParams::FindClosest(const vector<Radians>& vec, //TODO:FindClosest
                                      const Radians& val) {
   size_t found = 0;
   if (vec.front() < vec.back()) {
@@ -204,6 +206,22 @@ std::unique_ptr<ProjectionParams> ProjectionParams::HDL_64() {
   }
   return mem_utils::make_unique<ProjectionParams>(params);
 }
+
+std::unique_ptr<ProjectionParams> ProjectionParams::MID_360() //TODO:MID_360() defined
+{
+  auto params = ProjectionParams();
+  params.SetSpan(SpanParams(-180_deg, 180_deg, 1000),
+                 SpanParams::Direction::HORIZONTAL);
+  params.SetSpan(SpanParams(-7_deg, 52_deg, 32),
+                 SpanParams::Direction::VERTICAL);
+  params.FillCosSin();
+  if (!params.valid()) {
+    fprintf(stderr, "ERROR: params are not valid!\n");
+    return nullptr;
+  }
+  return mem_utils::make_unique<ProjectionParams>(params);
+}
+
 
 std::unique_ptr<ProjectionParams> ProjectionParams::FullSphere(
     const Radians& discretization) {

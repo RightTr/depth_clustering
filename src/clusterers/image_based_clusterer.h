@@ -28,6 +28,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 #include "communication/abstract_client.h"
 #include "communication/abstract_sender.h"
@@ -40,6 +41,7 @@
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "image_labelers/linear_image_labeler.h"
 #include "projections/cloud_projection.h"
+#include "clusterers/clusterer_filter.h"
 
 namespace depth_clustering {
 
@@ -117,7 +119,7 @@ class ImageBasedClusterer : public AbstractClusterer {
             timer.measure());
 
     // create 3d clusters from image labels
-    std::unordered_map<uint16_t, Cloud> clusters;
+    std::unordered_map<uint16_t, Cloud> clusters; //TODO:Hash table
     for (int row = 0; row < labels_ptr->rows; ++row) {
       for (int col = 0; col < labels_ptr->cols; ++col) {
         const auto& point_container = cloud.projection_ptr()->at(row, col);
@@ -151,8 +153,11 @@ class ImageBasedClusterer : public AbstractClusterer {
     }
 
     fprintf(stderr, "INFO: prepared clusters in: %lu us\n", timer.measure());
+    std::cout << "Amount of clusters: " << clusters.size() << std::endl;
+
 
     this->ShareDataWithAllClients(clusters);
+    
     fprintf(stderr, "INFO: clusters shared: %lu us\n", timer.measure());
   }
 

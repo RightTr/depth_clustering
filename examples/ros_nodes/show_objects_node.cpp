@@ -96,14 +96,14 @@ int main(int argc, char* argv[]) { //TODO:ROS
     switch (type_arg.getValue()) 
     {
       case 360:
-        proj_params_ptr = ProjectionParams::VLP_16();
+        proj_params_ptr = ProjectionParams::MID_360();
         break;
     }
   }
 
   if (!proj_params_ptr) {
     fprintf(stderr,
-            "Params Error!");
+            "Params Load Error!");
     exit(1);
   }
   
@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) { //TODO:ROS
   visualizer.show();
 
   int min_cluster_size = 20;
-  int max_cluster_size = 100000;
+  int max_cluster_size = 100;
 
   int smooth_window_size = 7;
   Radians ground_remove_angle = 7_deg;
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) { //TODO:ROS
   fprintf(stderr, "INFO: Running with angle tollerance: %f degrees\n",
           angle_tollerance.ToDegrees());
 
-  subscriber.StartListeningToRos();
+  subscriber.StartListeningToRos(mylidar); //TODO:StartListeningToRos
   ros::AsyncSpinner spinner(1);
   spinner.start();
 
