@@ -126,6 +126,16 @@ float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
   return sqrt(max_point.x() * max_point.x() + min_point.y() * min_point.y());
 }
 
+Eigen::Vector3f Cloud::ComputeClusterCenter() const
+{
+  Eigen::Vector3f cluster_center = Eigen::Vector3f::Zero();
+  for (const auto& point : _points) 
+  {
+    cluster_center += Eigen::Vector3f(point.x(), point.y(), point.z());
+  }
+  return cluster_center / static_cast<float>(_points.size());
+}
+
 // this code will be only there if we use pcl
 #ifdef PCL_FOUND
 

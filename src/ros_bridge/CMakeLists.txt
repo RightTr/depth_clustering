@@ -18,7 +18,7 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-add_library(ros_bridge SHARED cloud_odom_ros_subscriber.cpp)
+add_library(ros_bridge SHARED cloud_odom_ros_subscriber.cpp clusters_ros_publisher.cpp)
 target_link_libraries(ros_bridge
                       identifiable
                       ${catkin_LIBRARIES}
