@@ -139,7 +139,7 @@ class DepthGroundRemover : public AbstractClient<Cloud>,
 
   ProjectionParams _params;
   int _window_size = 5;
-  Radians _ground_remove_angle = 5_deg;
+  Radians _ground_remove_angle = 10_deg;
   float _eps = 0.001f;
 
   mutable int _counter = 0;

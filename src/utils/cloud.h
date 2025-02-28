@@ -97,6 +97,10 @@ class Cloud {
 
   void InitProjection(const ProjectionParams& params);
 
+  float ComputePointsCenterZ() const;
+
+  float ComputeDistance2DMax() const;
+
   static Cloud::Ptr FromImage(const cv::Mat& image,
                               const ProjectionParams& params);
 

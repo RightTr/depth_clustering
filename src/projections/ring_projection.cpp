@@ -27,12 +27,12 @@
 
 namespace depth_clustering {
 
-void RingProjection::InitFromPoints(const RichPoint::AlignedVector& points) { //TODO::InitFromPoints
+void RingProjection::InitFromPoints(const RichPoint::AlignedVector& points) { 
   fprintf(stderr, "Projecting cloud with %lu points\n", points.size());
   time_utils::Timer timer;
   this->CheckCloudAndStorage(points);
   // share ownership of input cloud
-  std::cout << "Use RingProjection" << std::endl;
+  // std::cout << "Use RingProjection" << std::endl;
   for (size_t index = 0; index < points.size(); ++index) {
     const auto& point = points[index];
     float dist_to_sensor = point.DistToSensor2D();

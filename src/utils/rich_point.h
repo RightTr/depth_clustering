@@ -29,14 +29,14 @@ namespace depth_clustering {
 /**
  * @brief      A point class that holds additional ring information
  */
-class RichPoint {
+class RichPoint { //TODO:RichPoint
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   using AlignedVector =
       std::vector<RichPoint, Eigen::aligned_allocator<RichPoint>>;
 
-  RichPoint() {}
+  RichPoint() {} 
   explicit RichPoint(float x, float y, float z) : _point(x, y, z) {}
   explicit RichPoint(float x, float y, float z, uint16_t ring)
       : _point{x, y, z}, _ring{ring} {}

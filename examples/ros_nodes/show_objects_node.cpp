@@ -114,10 +114,10 @@ int main(int argc, char* argv[]) { //TODO:ROS
   visualizer.show();
 
   int min_cluster_size = 20;
-  int max_cluster_size = 100;
+  int max_cluster_size = 1000;
 
   int smooth_window_size = 7;
-  Radians ground_remove_angle = 7_deg;
+  Radians ground_remove_angle = 10_deg;
 
   auto depth_ground_remover = DepthGroundRemover(
       *proj_params_ptr, ground_remove_angle, smooth_window_size);
@@ -127,6 +127,7 @@ int main(int argc, char* argv[]) { //TODO:ROS
 
   subscriber.AddClient(&depth_ground_remover);
   depth_ground_remover.AddClient(&clusterer);
+  
   clusterer.AddClient(visualizer.object_clouds_client());
   subscriber.AddClient(&visualizer);
 

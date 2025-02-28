@@ -50,7 +50,7 @@ void ObjectPainter::OnNewObjectReceived(
           timer.measure(Timer::Units::Micro));
 }
 
-Drawable::UniquePtr ObjectPainter::CreateDrawableCube(
+Drawable::UniquePtr ObjectPainter::CreateDrawableCube( //TODO:CreateDrawableCube
     const depth_clustering::Cloud& cloud) {
   Eigen::Vector3f center = Eigen::Vector3f::Zero();
   Eigen::Vector3f extent = Eigen::Vector3f::Zero();

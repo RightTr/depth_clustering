@@ -28,7 +28,7 @@ using std::vector;
 
 static vector<array<int, 3>> COLORS;
 
-Visualizer::Visualizer(QWidget* parent)
+Visualizer::Visualizer(QWidget* parent) //TODO:Visualizer
     : QGLViewer(parent), AbstractClient<Cloud>(), _updated{false} {
   _cloud_obj_storer.SetUpdateListener(this);
 }

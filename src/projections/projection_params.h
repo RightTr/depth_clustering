@@ -75,7 +75,7 @@ class SpanParams {
 /**
  * @brief      Class for projection parameters.
  */
-class ProjectionParams {
+class ProjectionParams { //TODO:Class ProjectionParams
  public:
   using Ptr = shared_ptr<ProjectionParams>;
   using ConstPtr = const shared_ptr<const ProjectionParams>;
@@ -119,7 +119,7 @@ class ProjectionParams {
     return _h_span_params.end_angle();
   }
   inline const Radians& h_span() const { return _h_span_params.span(); }
-  inline size_t rows() const { return _row_angles.size(); }
+  inline size_t rows() const { return _row_angles.size(); } //TODO:rows()&&cols()
   inline size_t cols() const { return _col_angles.size(); }
   inline size_t size() const { return rows() * cols(); }
 
@@ -191,14 +191,13 @@ class ProjectionParams {
    * @return     A pointer to parameters
    */
   static std::unique_ptr<ProjectionParams> HDL_64_EQUAL();
-  /**
-   * @brief      Default parameters for Velodyne from config file
-   *
-   * @return     A pointer to parameters
-   */
 
   static std::unique_ptr<ProjectionParams> MID_360(); //TODO::MID_360 params declared
-  
+  /**
+ * @brief      Default parameters for Velodyne from config file
+ *
+ * @return     A pointer to parameters
+ */
   static std::unique_ptr<ProjectionParams> FromConfigFile(
       const std::string& path);
   /**

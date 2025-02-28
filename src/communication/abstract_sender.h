@@ -138,7 +138,7 @@ class AbstractSender : public virtual Identifiable {
    * @param[in]  obj   Object to share
    * @param[in]  id    Id, by default this->id()
    */
-  void ShareDataWithAllClients(const ObjSendType& obj, int id = -1) {
+  void ShareDataWithAllClients(const ObjSendType& obj, int id = -1) { //TODO:ShareDataWithAllClients
     int id_to_use = id >= 0 ? id : this->id();
     for (auto& kv : _clients) {
       kv.second->OnNewObjectReceived(obj, id_to_use);

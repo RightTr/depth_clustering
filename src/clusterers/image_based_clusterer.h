@@ -41,7 +41,6 @@
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "image_labelers/linear_image_labeler.h"
 #include "projections/cloud_projection.h"
-#include "clusterers/clusterer_filter.h"
 
 namespace depth_clustering {
 
@@ -141,20 +140,31 @@ class ImageBasedClusterer : public AbstractClusterer {
 
     // filter out unfitting clusters
     std::vector<uint16_t> labels_to_erase;
-    for (const auto& kv : clusters) {
+    for (const auto& kv : clusters) 
+    {
       const auto& cluster = kv.second;
-      if (cluster.size() < this->_min_cluster_size ||
-          cluster.size() > this->_max_cluster_size) {
+      if(cluster.size() < this->_min_cluster_size ||
+          cluster.size() > this->_max_cluster_size) 
+      {
+        labels_to_erase.push_back(kv.first);
+        
+      }
+      if(cluster.ComputePointsCenterZ() > 2)
+      {
+        labels_to_erase.push_back(kv.first);
+      }
+      if(cluster.ComputeDistance2DMax() > 3)
+      {
         labels_to_erase.push_back(kv.first);
       }
     }
+    //TODO:Wait to be continued
     for (auto label : labels_to_erase) {
       clusters.erase(label);
     }
 
     fprintf(stderr, "INFO: prepared clusters in: %lu us\n", timer.measure());
-    std::cout << "Amount of clusters: " << clusters.size() << std::endl;
-
+    fprintf(stderr, "Amount of clusters: %d\n", static_cast<int>(clusters.size()));
 
     this->ShareDataWithAllClients(clusters);
     

@@ -65,7 +65,7 @@ void Cloud::SetProjectionPtr(typename CloudProjection::Ptr proj_ptr) {
   _projection = proj_ptr;
 }
 
-void Cloud::InitProjection(const ProjectionParams& params) {
+void Cloud::InitProjection(const ProjectionParams& params) { //TODO:InitProjection
   if (_projection) {
     throw std::runtime_error("projection is already initialized");
   }
@@ -97,6 +97,33 @@ Cloud::Ptr Cloud::FromImage(const cv::Mat& image,
   cloud.SetProjectionPtr(proj);
   // we cannot share ownership of this cloud with others, so create a new one
   return boost::make_shared<Cloud>(cloud);
+}
+
+float Cloud::ComputePointsCenterZ() const //TODO:ComputePointsCenterZ
+{
+  float z_sum = 0.0;
+  for(const auto& point : _points)
+  {
+    z_sum += point.z();
+  }
+  return z_sum / _points.size();
+}
+
+float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
+{
+  float dis_max = 0.0;
+  Eigen::Vector2f max_point(std::numeric_limits<float>::lowest(),
+                            std::numeric_limits<float>::lowest());
+  Eigen::Vector2f min_point(std::numeric_limits<float>::max(),
+                            std::numeric_limits<float>::max());
+  for (const auto& point : _points) 
+  {
+    min_point << std::min(min_point.x(), point.x()),
+        std::min(min_point.y(), point.y());
+    max_point << std::max(max_point.x(), point.x()),
+        std::max(max_point.y(), point.y());
+  }
+  return sqrt(max_point.x() * max_point.x() + min_point.y() * min_point.y());
 }
 
 // this code will be only there if we use pcl
