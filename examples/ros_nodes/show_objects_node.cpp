@@ -20,11 +20,13 @@
 
 #include <ros/ros.h>
 
+
 #include <qapplication.h>
 
 #include <string>
 
 #include "ros_bridge/cloud_odom_ros_subscriber.h"
+#include "ros_bridge/clusters_ros_publisher.h"
 
 #include "clusterers/image_based_clusterer.h"
 #include "ground_removal/depth_ground_remover.h"
@@ -56,7 +58,6 @@ int main(int argc, char* argv[]) { //TODO:ROS
   TCLAP::ValueArg<int> type_arg(
   "", "type", "For Velodyne, num of vertical beams in laser. One of: [16, 32, 64]. For Livox ,type of livox lidar. One of: [360, ...]",
   true, 0, "int");
-
 
   cmd.add(angle_arg);
   cmd.add(lidar_arg);
@@ -108,6 +109,7 @@ int main(int argc, char* argv[]) { //TODO:ROS
   }
   
   CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds);
+  ClustersRosPublisher publisher(nh, "/depth_clustering/clusters");
 
   // CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds_livox);
   Visualizer visualizer;
@@ -127,8 +129,10 @@ int main(int argc, char* argv[]) { //TODO:ROS
 
   subscriber.AddClient(&depth_ground_remover);
   depth_ground_remover.AddClient(&clusterer);
+  clusterer.AddClient(&publisher);
+
   
-  clusterer.AddClient(visualizer.object_clouds_client());
+  publisher.AddClient(visualizer.object_clouds_client());
   subscriber.AddClient(&visualizer);
 
   fprintf(stderr, "INFO: Running with angle tollerance: %f degrees\n",
