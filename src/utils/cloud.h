@@ -101,7 +101,7 @@ class Cloud {
 
   float ComputeDistance2DMax() const;
 
-  Eigen::Vector3f ComputeClusterCenter() const;
+  Eigen::Vector4f ComputeClusterCenterRadius() const;
 
   static Cloud::Ptr FromImage(const cv::Mat& image,
                               const ProjectionParams& params);

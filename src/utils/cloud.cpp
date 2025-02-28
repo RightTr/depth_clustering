@@ -111,7 +111,6 @@ float Cloud::ComputePointsCenterZ() const //TODO:ComputePointsCenterZ
 
 float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
 {
-  float dis_max = 0.0;
   Eigen::Vector2f max_point(std::numeric_limits<float>::lowest(),
                             std::numeric_limits<float>::lowest());
   Eigen::Vector2f min_point(std::numeric_limits<float>::max(),
@@ -126,14 +125,24 @@ float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
   return sqrt(max_point.x() * max_point.x() + min_point.y() * min_point.y());
 }
 
-Eigen::Vector3f Cloud::ComputeClusterCenter() const
+Eigen::Vector4f Cloud::ComputeClusterCenterRadius() const
 {
-  Eigen::Vector3f cluster_center = Eigen::Vector3f::Zero();
+  Eigen::Vector4f cluster_ = Eigen::Vector4f::Zero();
+  Eigen::Vector2f max_point(std::numeric_limits<float>::lowest(),
+                            std::numeric_limits<float>::lowest());
+  Eigen::Vector2f min_point(std::numeric_limits<float>::max(),
+                            std::numeric_limits<float>::max());
   for (const auto& point : _points) 
   {
-    cluster_center += Eigen::Vector3f(point.x(), point.y(), point.z());
+    cluster_ += Eigen::Vector4f(point.x(), point.y(), point.z(), 0);
+    min_point << std::min(min_point.x(), point.x()),
+      std::min(min_point.y(), point.y());
+    max_point << std::max(max_point.x(), point.x()),
+      std::max(max_point.y(), point.y());
   }
-  return cluster_center / static_cast<float>(_points.size());
+  cluster_ /= static_cast<float>(_points.size());
+  cluster_.w() = sqrt(max_point.x() * max_point.x() + min_point.y() * min_point.y());
+  return cluster_;
 }
 
 // this code will be only there if we use pcl
