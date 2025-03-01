@@ -62,6 +62,7 @@ target_link_libraries(qt_widgets
                       velodyne_utils
                       folder_reader
                       bbox
+                      ros_bridge
                       ${catkin_LIBRARIES}
                       ${OpenCV_LIBS}
                       ${QGLVIEWER_LIBRARY}

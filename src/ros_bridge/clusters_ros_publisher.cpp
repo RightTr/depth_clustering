@@ -4,15 +4,11 @@
 #include <vector>
 #include <string>
 
-
-
-
 namespace depth_clustering {
 
 using std::vector;
 using std::string;
 using std::map;
-
 
 ClustersRosPublisher::ClustersRosPublisher(ros::NodeHandle& node_handle, const std::string& topic_clusters)
                                             : Receiver(), Sender(SenderType::STREAMER)
@@ -21,8 +17,9 @@ ClustersRosPublisher::ClustersRosPublisher(ros::NodeHandle& node_handle, const s
 }
 
 void ClustersRosPublisher::OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clusters, 
-                                                const int id)
+                                                const int)
 {
+    time_utils::Timer timer;
     clusters_position.data.clear();
     for(const auto& cluster : clusters)
     {
@@ -32,6 +29,7 @@ void ClustersRosPublisher::OnNewObjectReceived(const std::unordered_map<uint16_t
     }
     this->ShareDataWithAllClients(clusters);
     clusters_publisher.publish(clusters_position);
+    fprintf(stderr, "INFO: publish clusters in: %lu us\n", timer.measure());
 }
 
 } 

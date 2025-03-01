@@ -36,6 +36,13 @@
 #include "visualization/visualizer.h"
 
 #include "tclap/CmdLine.h"
+#include "ros_bridge/parameters.h"
+
+
+extern int min_cluster_size;
+extern int max_cluster_size;
+extern int smooth_window_size;
+extern double ground_remove_angle_d;
 
 using std::string;
 
@@ -44,12 +51,14 @@ using namespace depth_clustering;
 using ClustererT = ImageBasedClusterer<LinearImageLabeler<>>;
 
 int main(int argc, char* argv[]) { //TODO:ROS
+  ros::init(argc, argv, "show_objects_node"); 
+
   TCLAP::CmdLine cmd(
       "Subscribe to /velodyne_points topic and show clustering on the data.",
       ' ', "1.0");
   TCLAP::ValueArg<std::string> lidar_arg(
     "", "lidar",
-    "Choose your lidar type(livox or velodyne)", true, "velodyne",
+    "Choose your lidar type(livox or velodyne)", false, "livox",
     "string");
   TCLAP::ValueArg<int> angle_arg(
       "", "angle",
@@ -57,7 +66,7 @@ int main(int argc, char* argv[]) { //TODO:ROS
       "int");
   TCLAP::ValueArg<int> type_arg(
   "", "type", "For Velodyne, num of vertical beams in laser. One of: [16, 32, 64]. For Livox ,type of livox lidar. One of: [360, ...]",
-  true, 0, "int");
+  false, 360, "int");
 
   cmd.add(angle_arg);
   cmd.add(lidar_arg);
@@ -70,8 +79,9 @@ int main(int argc, char* argv[]) { //TODO:ROS
 
   QApplication application(argc, argv);
 
-  ros::init(argc, argv, "show_objects_node");
+  
   ros::NodeHandle nh;
+  ReadParameters(nh);
 
   string topic_clouds;
 
@@ -115,11 +125,7 @@ int main(int argc, char* argv[]) { //TODO:ROS
   Visualizer visualizer;
   visualizer.show();
 
-  int min_cluster_size = 20;
-  int max_cluster_size = 1000;
-
-  int smooth_window_size = 7;
-  Radians ground_remove_angle = 10_deg;
+  Radians ground_remove_angle = double2deg(ground_remove_angle_d);
 
   auto depth_ground_remover = DepthGroundRemover(
       *proj_params_ptr, ground_remove_angle, smooth_window_size);

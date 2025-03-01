@@ -111,7 +111,6 @@ float Cloud::ComputePointsCenterZ() const //TODO:ComputePointsCenterZ
 
 float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
 {
-  float dis_max = 0.0;
   Eigen::Vector2f max_point(std::numeric_limits<float>::lowest(),
                             std::numeric_limits<float>::lowest());
   Eigen::Vector2f min_point(std::numeric_limits<float>::max(),

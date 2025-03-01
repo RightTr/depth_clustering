@@ -9,6 +9,7 @@
 
 #include "communication/abstract_sender.h"
 #include "utils/cloud.h"
+#include "utils/timer.h"
 
 
 namespace depth_clustering {
@@ -27,7 +28,7 @@ class ClustersRosPublisher :
         virtual ~ClustersRosPublisher() {}
 
         void OnNewObjectReceived(const std::unordered_map<uint16_t, Cloud>& clusters, 
-                                const int id) override;
+                                const int) override;
     protected:
 
         ros::Publisher clusters_publisher;

@@ -84,7 +84,8 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
 
  protected:
   Pose RosOdomToPose(const OdometryT::ConstPtr& msg);
-  Cloud::Ptr RosCloudToCloud(const PointCloudT::ConstPtr& msg);
+  Cloud::Ptr RosCloudToCloudRing(const PointCloudT::ConstPtr& msg);
+  Cloud::Ptr RosCloudToCloudIntensity(const PointCloudT::ConstPtr& msg);
 
   ros::NodeHandle* _node_handle;
 

@@ -39,6 +39,8 @@
 #include "utils/velodyne_utils.h"
 
 #include "tclap/CmdLine.h"
+#include "ros_bridge/parameters.h"
+
 
 using std::string;
 
