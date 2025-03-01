@@ -33,26 +33,26 @@
 
 #include "tclap/CmdLine.h"
 
+
 using std::string;
 
 using namespace depth_clustering;
 
 int main(int argc, char* argv[]) {
-   TCLAP::CmdLine cmd(
-      "Subscribe to /velodyne_points topic and show clustering on the data.",
-      ' ', "1.0");
+  TCLAP::CmdLine cmd(
+    "Subscribe to /velodyne_points topic and show clustering on the data.",
+    ' ', "1.0");
   TCLAP::ValueArg<std::string> lidar_arg(
     "", "lidar",
     "Choose your lidar type(livox or velodyne)", true, "velodyne",
     "string");
   TCLAP::ValueArg<int> angle_arg(
-      "", "angle",
-      "Threshold angle. Below this value, the objects are separated", false, 10,
-      "int");
+    "", "angle",
+    "Threshold angle. Below this value, the objects are separated", false, 10,
+    "int");
   TCLAP::ValueArg<int> type_arg(
-  "", "type", "For Velodyne, num of vertical beams in laser. One of: [16, 32, 64]. For Livox ,type of livox lidar. One of: [360, ...]",
-  true, 0, "int");
-
+    "", "type", "For Velodyne, num of vertical beams in laser. One of: [16, 32, 64]. For Livox ,type of livox lidar. One of: [360, ...]",
+    true, 0, "int");
 
   cmd.add(angle_arg);
   cmd.add(lidar_arg);

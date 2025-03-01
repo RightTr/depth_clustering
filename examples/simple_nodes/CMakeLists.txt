@@ -28,6 +28,7 @@ target_link_libraries(show_objects_kitti
                       folder_reader
                       viewer
                       drawable
+                      ros_bridge
                       ${MY_QT_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${PCL_LIBRARIES}
@@ -43,6 +44,7 @@ target_link_libraries(show_objects_moosmann
                       folder_reader
                       viewer
                       drawable
+                      ros_bridge
                       ${MY_QT_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${PCL_LIBRARIES}

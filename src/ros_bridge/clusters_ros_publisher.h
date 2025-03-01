@@ -11,6 +11,7 @@
 #include "utils/cloud.h"
 #include "utils/timer.h"
 
+
 namespace depth_clustering {
 
 class ClustersRosPublisher : 

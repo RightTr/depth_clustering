@@ -41,6 +41,10 @@
 #include "image_labelers/diff_helpers/diff_factory.h"
 #include "image_labelers/linear_image_labeler.h"
 #include "projections/cloud_projection.h"
+#include "ros_bridge/parameters.h"
+
+extern float centerz_threshold;
+extern float dis2d_threshold;
 
 namespace depth_clustering {
 
@@ -149,11 +153,11 @@ class ImageBasedClusterer : public AbstractClusterer {
         labels_to_erase.push_back(kv.first);
         
       }
-      if(cluster.ComputePointsCenterZ() > 2)
+      if(cluster.ComputePointsCenterZ() > centerz_threshold)
       {
         labels_to_erase.push_back(kv.first);
       }
-      if(cluster.ComputeDistance2DMax() > 3)
+      if(cluster.ComputeDistance2DMax() > dis2d_threshold)
       {
         labels_to_erase.push_back(kv.first);
       }

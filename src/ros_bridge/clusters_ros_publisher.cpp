@@ -8,6 +8,7 @@ namespace depth_clustering {
 using std::vector;
 using std::string;
 
+
 ClustersRosPublisher::ClustersRosPublisher(ros::NodeHandle& node_handle, const std::string& topic_clusters)
                                             : Receiver(), Sender(SenderType::STREAMER)
 {

@@ -1,0 +1,7 @@
+centerz_threshold: 2.0
+dis2d_threshold: 3.0
+min_cluster_size: 50
+max_cluster_size: 1000
+smooth_window_size: 7
+ground_remove_angle_d: 10
+

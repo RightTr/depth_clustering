@@ -126,7 +126,7 @@ void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar)
 void CloudOdomRosSubscriber::Callback(const PointCloud2::ConstPtr& msg_cloud,
                                       const Odometry::ConstPtr& msg_odom) {
   // PrintMsgStats(msg_cloud);
-  Cloud::Ptr cloud_ptr = RosCloudToCloud(msg_cloud);
+  Cloud::Ptr cloud_ptr = RosCloudToCloudRing(msg_cloud);
   cloud_ptr->SetPose(RosOdomToPose(msg_odom));
   cloud_ptr->InitProjection(_params);
   ShareDataWithAllClients(*cloud_ptr);
@@ -135,7 +135,7 @@ void CloudOdomRosSubscriber::Callback(const PointCloud2::ConstPtr& msg_cloud,
 void CloudOdomRosSubscriber::CallbackVelodyne( //TODO:CallbackVelodyne
     const PointCloud2::ConstPtr& msg_cloud) {
   // PrintMsgStats(msg_cloud);
-  Cloud::Ptr cloud_ptr = RosCloudToCloud(msg_cloud);
+  Cloud::Ptr cloud_ptr = RosCloudToCloudRing(msg_cloud);
   cloud_ptr->InitProjection(_params);
   ShareDataWithAllClients(*cloud_ptr);
 }
@@ -149,12 +149,12 @@ Pose CloudOdomRosSubscriber::RosOdomToPose(const Odometry::ConstPtr& msg) {
   return pose;
 }
 
-Cloud::Ptr CloudOdomRosSubscriber::RosCloudToCloud(
-    const PointCloud2::ConstPtr& msg) {
+Cloud::Ptr CloudOdomRosSubscriber::RosCloudToCloudRing(
+  const PointCloud2::ConstPtr& msg) {
   uint32_t x_offset = msg->fields[0].offset;
   uint32_t y_offset = msg->fields[1].offset;
   uint32_t z_offset = msg->fields[2].offset;
-  uint32_t ring_offset = msg->fields[4].offset;
+  uint32_t ring_offset = msg->fields[4].offset; //In MID360. This is Intensity.
 
   Cloud cloud;
   for (uint32_t point_start_byte = 0, counter = 0;
@@ -172,9 +172,33 @@ Cloud::Ptr CloudOdomRosSubscriber::RosCloudToCloud(
   return make_shared<Cloud>(cloud);
 }
 
+Cloud::Ptr CloudOdomRosSubscriber::RosCloudToCloudIntensity(
+  const PointCloud2::ConstPtr& msg)
+{
+  uint32_t x_offset = msg->fields[0].offset;
+  uint32_t y_offset = msg->fields[1].offset;
+  uint32_t z_offset = msg->fields[2].offset;
+  uint32_t intensity_offset = msg->fields[4].offset; //In MID360. This is Intensity.
+
+  Cloud cloud;
+  for (uint32_t point_start_byte = 0, counter = 0;
+       point_start_byte < msg->data.size();
+       point_start_byte += msg->point_step, ++counter) {
+    RichPoint point;
+    point.x() = BytesTo<float>(msg->data, point_start_byte + x_offset);
+    point.y() = BytesTo<float>(msg->data, point_start_byte + y_offset);
+    point.z() = BytesTo<float>(msg->data, point_start_byte + z_offset);
+    point.intensity() = BytesTo<uint8_t>(msg->data, point_start_byte + intensity_offset);
+    // point.z *= -1;  // hack
+    cloud.push_back(point);
+  }
+
+  return make_shared<Cloud>(cloud);
+}
+
 void CloudOdomRosSubscriber::CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud) //TODO:CallbackLivox
 {
-  Cloud::Ptr cloud_ptr = RosCloudToCloud(msg_cloud);
+  Cloud::Ptr cloud_ptr = RosCloudToCloudIntensity(msg_cloud);
   cloud_ptr->InitProjection(_params);
   ShareDataWithAllClients(*cloud_ptr);
 }
