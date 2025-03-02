@@ -1,0 +1,1 @@
+/home/right/depth_clutering_ws/devel/.private/depth_clustering/include/depth_clustering/CustomPoint.h

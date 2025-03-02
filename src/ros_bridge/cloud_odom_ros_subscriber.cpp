@@ -27,6 +27,8 @@
 
 #include "utils/pose.h"
 
+extern bool is_mid360_custom_msg;
+
 namespace depth_clustering {
 
 using ros::NodeHandle;
@@ -36,6 +38,7 @@ using message_filters::sync_policies::ApproximateTime;
 using nav_msgs::Odometry;
 using sensor_msgs::PointCloud2;
 using sensor_msgs::PointCloud2ConstPtr;
+using depth_clustering::CustomMsg;
 
 using std::vector;
 using std::string;
@@ -88,7 +91,8 @@ CloudOdomRosSubscriber::CloudOdomRosSubscriber(NodeHandle* node_handle,
   _topic_odom = topic_odom;
   _msg_queue_size = 100;
 
-  _subscriber_clouds = nullptr;
+  _subscriber_clouds_pcl2 = nullptr;
+  _subscriber_clouds_custom = nullptr;
   _subscriber_odom = nullptr;
   _sync = nullptr;
 }
@@ -97,28 +101,42 @@ void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar)
 {
   if (!_topic_odom.empty()) 
   {
-    _subscriber_clouds = new Subscriber<PointCloud2>(
+    _subscriber_clouds_pcl2 = new Subscriber<PointCloud2>(
         *_node_handle, _topic_clouds, _msg_queue_size);
     _subscriber_odom =
         new Subscriber<Odometry>(*_node_handle, _topic_odom, _msg_queue_size);
     _sync = new Synchronizer<ApproximateTimePolicy>(
-        ApproximateTimePolicy(100), *_subscriber_clouds, *_subscriber_odom);
+        ApproximateTimePolicy(100), *_subscriber_clouds_pcl2, *_subscriber_odom);
     _sync->registerCallback(
         boost::bind(&CloudOdomRosSubscriber::Callback, this, _1, _2));
   } 
   else 
   {
-    _subscriber_clouds = new Subscriber<PointCloud2>(
-        *_node_handle, _topic_clouds, _msg_queue_size);
     if(mylidar == "velodyne")
     {
-      _subscriber_clouds->registerCallback(
+      _subscriber_clouds_pcl2 = new Subscriber<PointCloud2>(
+        *_node_handle, _topic_clouds, _msg_queue_size);
+      _subscriber_clouds_pcl2->registerCallback(
           &CloudOdomRosSubscriber::CallbackVelodyne, this);
     }
     else if(mylidar == "livox")
-    {
-      _subscriber_clouds->registerCallback(
-      &CloudOdomRosSubscriber::CallbackLivox, this);
+    { 
+      if(is_mid360_custom_msg)
+      {
+        _subscriber_clouds_custom = new Subscriber<CustomMsg>(
+          *_node_handle, _topic_clouds, _msg_queue_size);
+        _subscriber_clouds_custom->registerCallback(std::bind(static_cast<void (CloudOdomRosSubscriber::*)
+          (const depth_clustering::CustomMsg::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivox) ,this, std::placeholders::_1));
+        return ; 
+      }
+      else
+      {
+        _subscriber_clouds_pcl2 = new Subscriber<PointCloud2>(
+          *_node_handle, _topic_clouds, _msg_queue_size);
+        _subscriber_clouds_pcl2->registerCallback(std::bind(static_cast<void (CloudOdomRosSubscriber::*)
+          (const sensor_msgs::PointCloud2::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivox) ,this, std::placeholders::_1));
+      }
+      
     }
   }
 }
@@ -178,7 +196,7 @@ Cloud::Ptr CloudOdomRosSubscriber::RosCloudToCloudIntensity(
   uint32_t x_offset = msg->fields[0].offset;
   uint32_t y_offset = msg->fields[1].offset;
   uint32_t z_offset = msg->fields[2].offset;
-  uint32_t intensity_offset = msg->fields[4].offset; //In MID360. This is Intensity.
+  uint32_t intensity_offset = msg->fields[4].offset;
 
   Cloud cloud;
   for (uint32_t point_start_byte = 0, counter = 0;
@@ -196,11 +214,37 @@ Cloud::Ptr CloudOdomRosSubscriber::RosCloudToCloudIntensity(
   return make_shared<Cloud>(cloud);
 }
 
-void CloudOdomRosSubscriber::CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud) //TODO:CallbackLivox
+Cloud::Ptr CloudOdomRosSubscriber::RosCloudToCloudIntensity(
+  const CustomMsgT::ConstPtr& msg)
 {
-  Cloud::Ptr cloud_ptr = RosCloudToCloudIntensity(msg_cloud);
+  Cloud cloud;
+  for (auto point : msg->points) 
+  {
+    RichPoint richpoint;
+    richpoint.x() = point.x;
+    richpoint.y() = point.y;
+    richpoint.z() = point.z;
+    richpoint.intensity() = point.reflectivity;
+    cloud.push_back(richpoint);
+  }
+
+  return make_shared<Cloud>(cloud);
+}
+
+void CloudOdomRosSubscriber::CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud_pcl2)
+{
+  Cloud::Ptr cloud_ptr = RosCloudToCloudIntensity(msg_cloud_pcl2);
   cloud_ptr->InitProjection(_params);
   ShareDataWithAllClients(*cloud_ptr);
 }
+
+void CloudOdomRosSubscriber::CallbackLivox(const depth_clustering::CustomMsg::ConstPtr& msg_cloud_custom) //TODO:CallbackLivox
+{
+  Cloud::Ptr cloud_ptr = RosCloudToCloudIntensity(msg_cloud_custom);
+  cloud_ptr->InitProjection(_params);
+  ShareDataWithAllClients(*cloud_ptr);
+}
+
+
 
 }  // namespace depth_clustering
