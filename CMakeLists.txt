@@ -124,6 +124,16 @@ find_package(catkin COMPONENTS
   message_filters
   tf
   eigen_conversions
+  message_generation
+)
+
+add_message_files(FILES
+  CustomPoint.msg
+  CustomMsg.msg
+)
+
+generate_messages(DEPENDENCIES
+std_msgs
 )
 
 # add some useful constants to configuration
@@ -168,6 +178,7 @@ catkin_package(
       velodyne_utils
       folder_reader
       visualization
+      message_runtime
  CATKIN_DEPENDS roscpp sensor_msgs std_msgs nav_msgs message_filters tf
 )
 

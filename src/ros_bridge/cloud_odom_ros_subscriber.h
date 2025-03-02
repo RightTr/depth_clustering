@@ -35,6 +35,12 @@
 #include "utils/pose.h"
 #include "utils/cloud.h"
 #include "utils/useful_typedefs.h"
+#include "depth_clustering/CustomPoint.h"
+#include "depth_clustering/CustomMsg.h"
+#include "parameters.h"
+
+
+
 
 namespace depth_clustering {
 
@@ -43,6 +49,7 @@ namespace depth_clustering {
  */
 class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
   using PointCloudT = sensor_msgs::PointCloud2;
+  using CustomMsgT = depth_clustering::CustomMsg;
   using OdometryT = nav_msgs::Odometry;
   using ApproximateTimePolicy =
       message_filters::sync_policies::ApproximateTime<PointCloudT, OdometryT>;
@@ -55,7 +62,8 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
                          const std::string& topic_odom = "");
   virtual ~CloudOdomRosSubscriber() {
     delete _subscriber_odom;
-    delete _subscriber_clouds;
+    delete _subscriber_clouds_pcl2;
+    delete _subscriber_clouds_custom;
     delete _sync;
   }
 
@@ -80,16 +88,20 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
    */
   void StartListeningToRos(const std::string mylidar);
 
-  void CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud);
+  void CallbackLivox(const sensor_msgs::PointCloud2::ConstPtr& msg_cloud_pcl2);
+
+  void CallbackLivox(const depth_clustering::CustomMsg::ConstPtr& msg_cloud_custom);
 
  protected:
   Pose RosOdomToPose(const OdometryT::ConstPtr& msg);
   Cloud::Ptr RosCloudToCloudRing(const PointCloudT::ConstPtr& msg);
   Cloud::Ptr RosCloudToCloudIntensity(const PointCloudT::ConstPtr& msg);
+  Cloud::Ptr RosCloudToCloudIntensity(const CustomMsgT::ConstPtr& msg);
 
   ros::NodeHandle* _node_handle;
 
-  message_filters::Subscriber<PointCloudT>* _subscriber_clouds;
+  message_filters::Subscriber<PointCloudT>* _subscriber_clouds_pcl2;
+  message_filters::Subscriber<CustomMsgT>* _subscriber_clouds_custom;
   message_filters::Subscriber<OdometryT>* _subscriber_odom;
   message_filters::Synchronizer<ApproximateTimePolicy>* _sync;
   std::string _topic_clouds;
