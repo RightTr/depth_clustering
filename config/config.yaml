@@ -9,4 +9,16 @@ depth_clustering:
 lidar:
   is_mid360_custom_msg: true
 
+odometry:
+  is_use_odometry: true
+  is_mid360_tf: true
+  space_width: 5
+  space_length: 18
+  lidar2robot_x: 0.0
+  lidar2robot_y: 0.24215
+
+topic: 
+  odom_topic: "/aft_mapped_to_init"
+  lidar_topic: "/livox/lidar"
+
 

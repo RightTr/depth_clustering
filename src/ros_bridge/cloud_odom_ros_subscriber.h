@@ -51,8 +51,10 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
   using PointCloudT = sensor_msgs::PointCloud2;
   using CustomMsgT = depth_clustering::CustomMsg;
   using OdometryT = nav_msgs::Odometry;
-  using ApproximateTimePolicy =
+  using ApproximateTimePolicyPcl2 =
       message_filters::sync_policies::ApproximateTime<PointCloudT, OdometryT>;
+  using ApproximateTimePolicyCustom =
+      message_filters::sync_policies::ApproximateTime<CustomMsgT, OdometryT>;
 
  public:
   CloudOdomRosSubscriber(){}
@@ -64,7 +66,8 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
     delete _subscriber_odom;
     delete _subscriber_clouds_pcl2;
     delete _subscriber_clouds_custom;
-    delete _sync;
+    delete _sync_pcl2;
+    delete _sync_custom;
   }
 
   /**
@@ -73,9 +76,14 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
    * @param[in]  msg_cloud  The message cloud
    * @param[in]  msg_odom   The message odom
    */
-  void Callback(const PointCloudT::ConstPtr& msg_cloud,
+  void CallbackVelodyneOdom(const PointCloudT::ConstPtr& msg_cloud,
                 const OdometryT::ConstPtr& msg_odom);
 
+  void CallbackLivoxOdom(const PointCloudT::ConstPtr& msg_cloud,
+                const OdometryT::ConstPtr& msg_odom);
+
+  void CallbackLivoxOdom(const CustomMsgT::ConstPtr& msg_cloud,
+                const OdometryT::ConstPtr& msg_odom);
   /**
    * @brief      Get point cloud from ROS
    *
@@ -92,6 +100,8 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
 
   void CallbackLivox(const depth_clustering::CustomMsg::ConstPtr& msg_cloud_custom);
 
+  void Sensor2Robot(OdometryT::Ptr& msg_odom);
+
  protected:
   Pose RosOdomToPose(const OdometryT::ConstPtr& msg);
   Cloud::Ptr RosCloudToCloudRing(const PointCloudT::ConstPtr& msg);
@@ -103,9 +113,11 @@ class CloudOdomRosSubscriber : public AbstractSender<Cloud> {
   message_filters::Subscriber<PointCloudT>* _subscriber_clouds_pcl2;
   message_filters::Subscriber<CustomMsgT>* _subscriber_clouds_custom;
   message_filters::Subscriber<OdometryT>* _subscriber_odom;
-  message_filters::Synchronizer<ApproximateTimePolicy>* _sync;
+  message_filters::Synchronizer<ApproximateTimePolicyPcl2>* _sync_pcl2;
+  message_filters::Synchronizer<ApproximateTimePolicyCustom>* _sync_custom;
   std::string _topic_clouds;
   std::string _topic_odom;
+  std::string _mylidar;
 
   ProjectionParams _params;
 

@@ -109,6 +109,18 @@ float Cloud::ComputePointsCenterZ() const //TODO:ComputePointsCenterZ
   return z_sum / _points.size();
 }
 
+Eigen::Vector2f Cloud::ComputePointCenterXY() const
+{
+  float x_sum = 0.0;
+  float y_sum = 0.0;
+  for(const auto& point : _points)
+  {
+    x_sum += point.x();
+    y_sum += point.y();
+  }
+  return Eigen::Vector2f(x_sum / _points.size(), y_sum / _points.size());
+}
+
 float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
 {
   Eigen::Vector2f max_point(std::numeric_limits<float>::lowest(),
@@ -143,6 +155,30 @@ Eigen::Vector4f Cloud::ComputeClusterCenterRadius() const
   cluster_ /= static_cast<float>(_points.size());
   cluster_.w() = sqrt(max_point.x() * max_point.x() + min_point.y() * min_point.y());
   return cluster_;
+}
+
+bool Cloud::IsClustersOutside(const Pose& pose, 
+          const float& width, const float& length) const
+{
+  // fprintf(stderr, "x:%f, y:%f, yaw:%f\n", pose.x(), pose.y(), pose.theta());
+  Eigen::Vector2f cloudxy = ComputePointCenterXY();
+  if(abs(cloudxy.x() * cosf(pose.theta())) > pose.x())
+  {
+    return true;
+  }
+  if(abs(cloudxy.x() * cosf(pose.theta())) > width - pose.x())
+  {
+    return true;
+  }
+  if(abs(cloudxy.y() * sinf(pose.theta())) > length)
+  {
+    return true;
+  }
+  if(abs(cloudxy.y() * sinf(pose.theta())) > length - pose.y())
+  {
+    return true;
+  }
+  return false;
 }
 
 // this code will be only there if we use pcl

@@ -38,13 +38,16 @@
 #include "tclap/CmdLine.h"
 #include "ros_bridge/parameters.h"
 
+using std::string;
 
 extern int min_cluster_size;
 extern int max_cluster_size;
 extern int smooth_window_size;
 extern double ground_remove_angle_d;
+extern string lidar_topic;
+extern string odom_topic;
 
-using std::string;
+
 
 using namespace depth_clustering;
 
@@ -83,11 +86,9 @@ int main(int argc, char* argv[]) { //TODO:ROS
   ros::NodeHandle nh;
   ReadParameters(nh);
 
-  string topic_clouds;
 
   if(mylidar == "velodyne")
   {
-    topic_clouds = "/velodyne_points";
     switch (type_arg.getValue()) 
     {
       case 16:
@@ -103,7 +104,6 @@ int main(int argc, char* argv[]) { //TODO:ROS
   }
   else if(mylidar == "livox")
   {
-    topic_clouds = "/livox/lidar";
     switch (type_arg.getValue()) 
     {
       case 360:
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) { //TODO:ROS
     exit(1);
   }
   
-  CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds);
+  CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, lidar_topic, odom_topic);
   ClustersRosPublisher publisher(nh, "/depth_clustering/clusters");
 
   // CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds_livox);

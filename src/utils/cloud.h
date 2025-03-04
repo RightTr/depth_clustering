@@ -62,7 +62,7 @@ class Cloud {
 
   inline const RichPoint::AlignedVector& points() const { return _points; }
 
-  inline Pose& pose() { return _pose; }
+  inline Pose& pose() { return _pose; } 
   inline const Pose& pose() const { return _pose; }
 
   inline Pose& sensor_pose() { return _sensor_pose; }
@@ -81,6 +81,7 @@ class Cloud {
 
   inline void Resize(size_t new_size) { _points.resize(new_size); }
   inline void SetPose(const Pose& pose) { _pose = pose; }
+  inline void SetSensorPose(const Pose& sensor_pose) { _sensor_pose = sensor_pose; }
 
   inline const typename CloudProjection::ConstPtr projection_ptr() const {
     return _projection;
@@ -101,7 +102,11 @@ class Cloud {
 
   float ComputeDistance2DMax() const;
 
+  Eigen::Vector2f ComputePointCenterXY() const;
+
   Eigen::Vector4f ComputeClusterCenterRadius() const;
+
+  bool IsClustersOutside(const Pose& pose, const float& width, const float& length) const;
 
   static Cloud::Ptr FromImage(const cv::Mat& image,
                               const ProjectionParams& params);

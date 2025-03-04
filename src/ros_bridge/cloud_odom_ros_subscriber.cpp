@@ -24,10 +24,18 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <iostream>
 
 #include "utils/pose.h"
 
 extern bool is_mid360_custom_msg;
+extern bool is_use_odometry;
+extern bool is_mid360_tf;
+extern float lidar2robot_x;
+extern float lidar2robot_y;
+float lidar2robot = sqrt(lidar2robot_x * lidar2robot_x
+                          + lidar2robot_y * lidar2robot_y);
+float lidar2robot_angle = atan2f(lidar2robot_y, lidar2robot_x);
 
 namespace depth_clustering {
 
@@ -94,21 +102,51 @@ CloudOdomRosSubscriber::CloudOdomRosSubscriber(NodeHandle* node_handle,
   _subscriber_clouds_pcl2 = nullptr;
   _subscriber_clouds_custom = nullptr;
   _subscriber_odom = nullptr;
-  _sync = nullptr;
+  _sync_pcl2 = nullptr;
+  _sync_custom = nullptr;
 }
 
 void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar) 
 {
-  if (!_topic_odom.empty()) 
+  _mylidar = mylidar;
+  if (is_use_odometry) 
   {
-    _subscriber_clouds_pcl2 = new Subscriber<PointCloud2>(
+    _subscriber_odom = new Subscriber<Odometry>(
+      *_node_handle, _topic_odom, _msg_queue_size);
+    if(mylidar == "velodyne")
+    {
+      _subscriber_clouds_pcl2 = new Subscriber<PointCloud2>(
         *_node_handle, _topic_clouds, _msg_queue_size);
-    _subscriber_odom =
-        new Subscriber<Odometry>(*_node_handle, _topic_odom, _msg_queue_size);
-    _sync = new Synchronizer<ApproximateTimePolicy>(
-        ApproximateTimePolicy(100), *_subscriber_clouds_pcl2, *_subscriber_odom);
-    _sync->registerCallback(
-        boost::bind(&CloudOdomRosSubscriber::Callback, this, _1, _2));
+      _sync_pcl2 = new Synchronizer<ApproximateTimePolicyPcl2>(
+        ApproximateTimePolicyPcl2(100), *_subscriber_clouds_pcl2, *_subscriber_odom);
+      _sync_pcl2->registerCallback(
+        boost::bind(&CloudOdomRosSubscriber::CallbackVelodyneOdom, this, _1, _2));
+    }
+    else if(mylidar == "livox")
+    { 
+      if(is_mid360_custom_msg)
+      {
+
+        _subscriber_clouds_custom = new Subscriber<CustomMsgT>(
+          *_node_handle, _topic_clouds, _msg_queue_size);
+        _sync_custom = new Synchronizer<ApproximateTimePolicyCustom>(
+          ApproximateTimePolicyCustom(100), *_subscriber_clouds_custom, *_subscriber_odom);
+        _sync_custom->registerCallback(std::bind(static_cast<void (CloudOdomRosSubscriber::*)
+          (const CustomMsgT::ConstPtr&, const OdometryT::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivoxOdom), this, 
+          std::placeholders::_1, std::placeholders::_2));
+        return ; 
+      }
+      else
+      {
+        _subscriber_clouds_pcl2 = new Subscriber<PointCloud2>(
+          *_node_handle, _topic_clouds, _msg_queue_size);
+        _sync_pcl2 = new Synchronizer<ApproximateTimePolicyPcl2>(
+          ApproximateTimePolicyPcl2(100), *_subscriber_clouds_pcl2, *_subscriber_odom);
+        _sync_pcl2->registerCallback(std::bind(static_cast<void (CloudOdomRosSubscriber::*)
+          (const PointCloudT::ConstPtr&, const OdometryT::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivoxOdom), this, 
+          std::placeholders::_1, std::placeholders::_2));
+      }
+    }
   } 
   else 
   {
@@ -126,7 +164,7 @@ void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar)
         _subscriber_clouds_custom = new Subscriber<CustomMsg>(
           *_node_handle, _topic_clouds, _msg_queue_size);
         _subscriber_clouds_custom->registerCallback(std::bind(static_cast<void (CloudOdomRosSubscriber::*)
-          (const depth_clustering::CustomMsg::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivox) ,this, std::placeholders::_1));
+          (const CustomMsgT::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivox), this, std::placeholders::_1));
         return ; 
       }
       else
@@ -134,17 +172,35 @@ void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar)
         _subscriber_clouds_pcl2 = new Subscriber<PointCloud2>(
           *_node_handle, _topic_clouds, _msg_queue_size);
         _subscriber_clouds_pcl2->registerCallback(std::bind(static_cast<void (CloudOdomRosSubscriber::*)
-          (const sensor_msgs::PointCloud2::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivox) ,this, std::placeholders::_1));
+          (const PointCloudT::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivox), this, std::placeholders::_1));
       }
-      
     }
   }
 }
 
-void CloudOdomRosSubscriber::Callback(const PointCloud2::ConstPtr& msg_cloud,
-                                      const Odometry::ConstPtr& msg_odom) {
+void CloudOdomRosSubscriber::CallbackVelodyneOdom(const PointCloud2::ConstPtr& msg_cloud,
+                                      const Odometry::ConstPtr& msg_odom) 
+{
   // PrintMsgStats(msg_cloud);
   Cloud::Ptr cloud_ptr = RosCloudToCloudRing(msg_cloud);
+  cloud_ptr->SetSensorPose(RosOdomToPose(msg_odom));
+  cloud_ptr->InitProjection(_params);
+  ShareDataWithAllClients(*cloud_ptr);
+}
+
+void CloudOdomRosSubscriber::CallbackLivoxOdom(const PointCloudT::ConstPtr& msg_cloud,
+              const OdometryT::ConstPtr& msg_odom)
+{
+  Cloud::Ptr cloud_ptr = RosCloudToCloudIntensity(msg_cloud);
+  cloud_ptr->SetSensorPose(RosOdomToPose(msg_odom));
+  cloud_ptr->InitProjection(_params);
+  ShareDataWithAllClients(*cloud_ptr);
+}
+
+void CloudOdomRosSubscriber::CallbackLivoxOdom(const CustomMsgT::ConstPtr& msg_cloud,
+              const OdometryT::ConstPtr& msg_odom)
+{
+  Cloud::Ptr cloud_ptr = RosCloudToCloudIntensity(msg_cloud);
   cloud_ptr->SetPose(RosOdomToPose(msg_odom));
   cloud_ptr->InitProjection(_params);
   ShareDataWithAllClients(*cloud_ptr);
@@ -162,7 +218,9 @@ Pose CloudOdomRosSubscriber::RosOdomToPose(const Odometry::ConstPtr& msg) {
   Pose pose;
   // we want float, so some casting is needed
   Eigen::Affine3d pose_double;
-  tf::poseMsgToEigen(msg->pose.pose, pose_double);
+  Odometry::Ptr msg_clone(new Odometry(*msg));
+  Sensor2Robot(msg_clone);
+  tf::poseMsgToEigen(msg_clone->pose.pose, pose_double);
   pose = pose_double.cast<float>();
   return pose;
 }
@@ -243,6 +301,34 @@ void CloudOdomRosSubscriber::CallbackLivox(const depth_clustering::CustomMsg::Co
   Cloud::Ptr cloud_ptr = RosCloudToCloudIntensity(msg_cloud_custom);
   cloud_ptr->InitProjection(_params);
   ShareDataWithAllClients(*cloud_ptr);
+}
+
+void CloudOdomRosSubscriber::Sensor2Robot(OdometryT::Ptr& msg_odom)
+{
+  Eigen::Quaterniond q(msg_odom->pose.pose.orientation.w, msg_odom->pose.pose.orientation.x, 
+                        msg_odom->pose.pose.orientation.y, msg_odom->pose.pose.orientation.z);
+  float tf_x = 0.0;
+  float tf_y = 0.0;
+  float euler_z = atan2(2 * (q.y() * q.x() + q.w() * q.z()),
+                   1 - 2 * (q.z() * q.z() + q.y() * q.y()));
+
+
+  if(is_mid360_tf)
+  {
+    tf_x = float(msg_odom->pose.pose.position.x) + 0.011 - 0.025757 * cosf(atan2f(0.02329, 0.011) + euler_z);
+    tf_y = float(msg_odom->pose.pose.position.y) + 0.02329 - 0.025757 * sinf(atan2f(0.02329, 0.011) + euler_z);
+  }
+  else
+  {
+    tf_x = float(msg_odom->pose.pose.position.x);
+    tf_y = float(msg_odom->pose.pose.position.y);
+  }
+
+  tf_x = tf_x + lidar2robot_x - lidar2robot * cosf(lidar2robot_angle + euler_z);
+  tf_y = tf_y + lidar2robot_y - lidar2robot * sinf(lidar2robot_angle + euler_z);
+
+  msg_odom->pose.pose.position.x = double(tf_x);
+  msg_odom->pose.pose.position.y = double(tf_y);
 }
 
 
