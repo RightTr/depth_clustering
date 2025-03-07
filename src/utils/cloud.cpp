@@ -134,7 +134,10 @@ float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
     max_point << std::max(max_point.x(), point.x()),
         std::max(max_point.y(), point.y());
   }
-  return sqrt(max_point.x() * max_point.x() + min_point.y() * min_point.y());
+  float dis_x = max_point.x() - min_point.x();
+  float dis_y = max_point.y() - min_point.y();
+  
+  return sqrt(dis_x * dis_x + dis_y + dis_y);
 }
 
 Eigen::Vector4f Cloud::ComputeClusterCenterRadius() const
@@ -153,7 +156,9 @@ Eigen::Vector4f Cloud::ComputeClusterCenterRadius() const
       std::max(max_point.y(), point.y());
   }
   cluster_ /= static_cast<float>(_points.size());
-  cluster_.w() = sqrt(max_point.x() * max_point.x() + min_point.y() * min_point.y());
+  float dis_x = max_point.x() - min_point.x();
+  float dis_y = max_point.y() - min_point.y();
+  cluster_.w() = sqrt(dis_x * dis_x + dis_y * dis_y);
   return cluster_;
 }
 

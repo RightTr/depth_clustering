@@ -5,7 +5,8 @@
 using std::string;
 
 extern float centerz_threshold;
-extern float dis2d_threshold;
+extern float dis2d_max_threshold;
+extern float dis2d_min_threshold;
 extern int min_cluster_size;
 extern int max_cluster_size;
 extern int smooth_window_size;
@@ -19,6 +20,7 @@ extern float lidar2robot_x;
 extern float lidar2robot_y;
 extern string odom_topic;
 extern string lidar_topic;
+
 
 
 

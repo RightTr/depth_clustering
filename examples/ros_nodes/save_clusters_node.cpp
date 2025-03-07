@@ -89,6 +89,9 @@ int main(int argc, char* argv[]) {
       case 360:
         proj_params_ptr = ProjectionParams::MID_360();
         break;
+      case 144:
+        proj_params_ptr = ProjectionParams::HAP_144();
+        break;
     }
   }
 

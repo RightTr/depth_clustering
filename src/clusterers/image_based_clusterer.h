@@ -44,9 +44,11 @@
 #include "ros_bridge/parameters.h"
 
 extern float centerz_threshold;
-extern float dis2d_threshold;
+extern float dis2d_max_threshold;
+extern float dis2d_min_threshold;
 extern float space_width;
 extern float space_length;
+extern bool is_use_odometry;
 
 namespace depth_clustering {
 
@@ -155,7 +157,7 @@ class ImageBasedClusterer : public AbstractClusterer {
         labels_to_erase.push_back(kv.first);
         
       }
-      if(cluster.IsClustersOutside(cloud.pose(), space_width, space_length))
+      if(cluster.IsClustersOutside(cloud.pose(), space_width, space_length) && is_use_odometry)
       {
         labels_to_erase.push_back(kv.first);
       }
@@ -165,7 +167,8 @@ class ImageBasedClusterer : public AbstractClusterer {
         {
           labels_to_erase.push_back(kv.first);
         }
-        if(cluster.ComputeDistance2DMax() > dis2d_threshold)
+        if(cluster.ComputeDistance2DMax() > dis2d_max_threshold || 
+          cluster.ComputeDistance2DMax() < dis2d_min_threshold)
         {
           labels_to_erase.push_back(kv.first);
         }

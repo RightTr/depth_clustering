@@ -171,7 +171,7 @@ class LinearImageLabeler : public AbstractImageLabeler {
   /**
    * @brief      Calculates the labels running over the whole image.
    */
-  void ComputeLabels(DiffFactory::DiffType diff_type) override {
+  void ComputeLabels(DiffFactory::DiffType diff_type) override { //TODO:ComputeLabels used
     _label_image =
         cv::Mat::zeros(_depth_image_ptr->size(), cv::DataType<uint16_t>::type);
     auto diff_helper_ptr =

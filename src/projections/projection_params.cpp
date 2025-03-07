@@ -222,6 +222,20 @@ std::unique_ptr<ProjectionParams> ProjectionParams::MID_360() //TODO:MID_360() d
   return mem_utils::make_unique<ProjectionParams>(params);
 }
 
+std::unique_ptr<ProjectionParams> ProjectionParams::HAP_144()
+{
+  auto params = ProjectionParams();
+  params.SetSpan(SpanParams(-60_deg, 60_deg, 1300),
+                 SpanParams::Direction::HORIZONTAL);
+  params.SetSpan(SpanParams(0_deg, 25_deg, 144),
+                 SpanParams::Direction::VERTICAL);
+  params.FillCosSin();
+  if (!params.valid()) {
+    fprintf(stderr, "ERROR: params are not valid!\n");
+    return nullptr;
+  }
+  return mem_utils::make_unique<ProjectionParams>(params);
+} 
 
 std::unique_ptr<ProjectionParams> ProjectionParams::FullSphere(
     const Radians& discretization) {

@@ -165,7 +165,6 @@ void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar)
           *_node_handle, _topic_clouds, _msg_queue_size);
         _subscriber_clouds_custom->registerCallback(std::bind(static_cast<void (CloudOdomRosSubscriber::*)
           (const CustomMsgT::ConstPtr&)>(&CloudOdomRosSubscriber::CallbackLivox), this, std::placeholders::_1));
-        return ; 
       }
       else
       {

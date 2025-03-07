@@ -1,16 +1,17 @@
 depth_clustering:
-  centerz_threshold: 2.0
-  dis2d_threshold: 3.0
-  min_cluster_size: 50
+  centerz_threshold: 0.5
+  dis2d_max_threshold: 1.5
+  dis2d_min_threshold: 1
+  min_cluster_size: 150
   max_cluster_size: 1000
   smooth_window_size: 7
   ground_remove_angle_d: 10
 
 lidar:
-  is_mid360_custom_msg: true
+  is_mid360_custom_msg: false
 
 odometry:
-  is_use_odometry: true
+  is_use_odometry: false
   is_mid360_tf: true
   space_width: 5
   space_length: 18
