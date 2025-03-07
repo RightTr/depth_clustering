@@ -33,7 +33,8 @@ target_link_libraries(depth_clustering_test
                     ${catkin_LIBRARIES}
                     ${PCL_LIBRARIES}
                     ${OpenCV_LIBS}
-                    ${GTEST_LIBRARIES})
+                    ${GTEST_LIBRARIES}
+                    Threads::Threads)
 
 # this will go away once we get rid of catkin
 add_test(test_clustering

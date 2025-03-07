@@ -1,13 +1,13 @@
 <launch>
 
-<!-- Launch file for Livox Mid360 -->
+<!-- Launch file for Livox HAP -->
 
     <rosparam command="load" file="$(find depth_clustering)/config/config.yaml" />       
 
-    <node name="Mid360_cluster_node" pkg="depth_clustering" type="show_objects_node" output="screen">
+    <node name="HAP_cluster_node" pkg="depth_clustering" type="show_objects_node" output="screen">
         <param name="lidar" value="livox" />
         <param name="angle" value="10" />
-        <param name="type" value="360" />
+        <param name="type" value="144" />
     </node>
 
 </launch>

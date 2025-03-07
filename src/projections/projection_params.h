@@ -193,6 +193,8 @@ class ProjectionParams { //TODO:Class ProjectionParams
   static std::unique_ptr<ProjectionParams> HDL_64_EQUAL();
 
   static std::unique_ptr<ProjectionParams> MID_360(); //TODO::MID_360 params declared
+
+  static std::unique_ptr<ProjectionParams> HAP_144();
   /**
  * @brief      Default parameters for Velodyne from config file
  *

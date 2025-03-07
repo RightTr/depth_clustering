@@ -59,6 +59,7 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int) { //
                                           _ground_remove_angle, _window_size);
   fprintf(stderr, "INFO: Ground removed in %lu us\n", total_timer.measure());
   cloud_copy.projection_ptr()->depth_image() = no_ground_image; //Remove ground
+  cloud_copy.pose() = cloud.pose();
   this->ShareDataWithAllClients(cloud_copy);
   _counter++;
 }

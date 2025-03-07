@@ -38,57 +38,67 @@
 #include "tclap/CmdLine.h"
 #include "ros_bridge/parameters.h"
 
+using std::string;
 
 extern int min_cluster_size;
 extern int max_cluster_size;
 extern int smooth_window_size;
 extern double ground_remove_angle_d;
+extern string lidar_topic;
+extern string odom_topic;
 
-using std::string;
+
 
 using namespace depth_clustering;
 
-using ClustererT = ImageBasedClusterer<LinearImageLabeler<>>;
+using ClustererT = ImageBasedClusterer<LinearImageLabeler<2, 2>>;
 
 int main(int argc, char* argv[]) { //TODO:ROS
   ros::init(argc, argv, "show_objects_node"); 
+  
+  std::string mylidar;
+  int mytype;
+  int myangle;
+
+  ros::param::get("~lidar", mylidar);
+  ros::param::get("~angle", myangle);
+  ros::param::get("~type", mytype);
 
   TCLAP::CmdLine cmd(
       "Subscribe to /velodyne_points topic and show clustering on the data.",
       ' ', "1.0");
   TCLAP::ValueArg<std::string> lidar_arg(
     "", "lidar",
-    "Choose your lidar type(livox or velodyne)", false, "livox",
-    "string");
+    "Choose your lidar type(livox or velodyne)", false, mylidar, "string");
   TCLAP::ValueArg<int> angle_arg(
       "", "angle",
-      "Threshold angle. Below this value, the objects are separated", false, 10,
-      "int");
+      "Threshold angle. Below this value, the objects are separated", false, myangle, "int");
   TCLAP::ValueArg<int> type_arg(
-  "", "type", "For Velodyne, num of vertical beams in laser. One of: [16, 32, 64]. For Livox ,type of livox lidar. One of: [360, ...]",
-  false, 360, "int");
+  "", "type", "For Velodyne, num of vertical beams in laser. One of: [16, 32, 64]. For Livox ,type of livox lidar. One of: [360, 144]",
+  false, mytype, "int");
 
   cmd.add(angle_arg);
   cmd.add(lidar_arg);
   cmd.add(type_arg);
   cmd.parse(argc, argv);
+  
+
   std::unique_ptr<ProjectionParams> proj_params_ptr = nullptr;
 
-  Radians angle_tollerance = Radians::FromDegrees(angle_arg.getValue());
-  std::string mylidar = lidar_arg.getValue();;
+  mylidar = lidar_arg.getValue();
+  myangle = angle_arg.getValue();
+  mytype = type_arg.getValue();
 
-  QApplication application(argc, argv);
-
-  
+  Radians angle_tollerance = Radians::FromDegrees(myangle);
   ros::NodeHandle nh;
+
   ReadParameters(nh);
 
-  string topic_clouds;
-
+  QApplication application(argc, argv);
+  
   if(mylidar == "velodyne")
   {
-    topic_clouds = "/velodyne_points";
-    switch (type_arg.getValue()) 
+    switch (mytype) 
     {
       case 16:
         proj_params_ptr = ProjectionParams::VLP_16();
@@ -103,11 +113,13 @@ int main(int argc, char* argv[]) { //TODO:ROS
   }
   else if(mylidar == "livox")
   {
-    topic_clouds = "/livox/lidar";
-    switch (type_arg.getValue()) 
+    switch (mytype) 
     {
       case 360:
         proj_params_ptr = ProjectionParams::MID_360();
+        break;
+      case 144:
+        proj_params_ptr = ProjectionParams::HAP_144();
         break;
     }
   }
@@ -117,8 +129,8 @@ int main(int argc, char* argv[]) { //TODO:ROS
             "Params Load Error!");
     exit(1);
   }
-  
-  CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds);
+
+  CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, lidar_topic, odom_topic);
   ClustersRosPublisher publisher(nh, "/depth_clustering/clusters");
 
   // CloudOdomRosSubscriber subscriber(&nh, *proj_params_ptr, topic_clouds_livox);

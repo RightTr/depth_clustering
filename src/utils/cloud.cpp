@@ -109,6 +109,18 @@ float Cloud::ComputePointsCenterZ() const //TODO:ComputePointsCenterZ
   return z_sum / _points.size();
 }
 
+Eigen::Vector2f Cloud::ComputePointCenterXY() const
+{
+  float x_sum = 0.0;
+  float y_sum = 0.0;
+  for(const auto& point : _points)
+  {
+    x_sum += point.x();
+    y_sum += point.y();
+  }
+  return Eigen::Vector2f(x_sum / _points.size(), y_sum / _points.size());
+}
+
 float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
 {
   Eigen::Vector2f max_point(std::numeric_limits<float>::lowest(),
@@ -122,17 +134,56 @@ float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
     max_point << std::max(max_point.x(), point.x()),
         std::max(max_point.y(), point.y());
   }
-  return sqrt(max_point.x() * max_point.x() + min_point.y() * min_point.y());
+  float dis_x = max_point.x() - min_point.x();
+  float dis_y = max_point.y() - min_point.y();
+  
+  return sqrt(dis_x * dis_x + dis_y + dis_y);
 }
 
-Eigen::Vector3f Cloud::ComputeClusterCenter() const
+Eigen::Vector4f Cloud::ComputeClusterCenterRadius() const
 {
-  Eigen::Vector3f cluster_center = Eigen::Vector3f::Zero();
+  Eigen::Vector4f cluster_ = Eigen::Vector4f::Zero();
+  Eigen::Vector2f max_point(std::numeric_limits<float>::lowest(),
+                            std::numeric_limits<float>::lowest());
+  Eigen::Vector2f min_point(std::numeric_limits<float>::max(),
+                            std::numeric_limits<float>::max());
   for (const auto& point : _points) 
   {
-    cluster_center += Eigen::Vector3f(point.x(), point.y(), point.z());
+    cluster_ += Eigen::Vector4f(point.x(), point.y(), point.z(), 0);
+    min_point << std::min(min_point.x(), point.x()),
+      std::min(min_point.y(), point.y());
+    max_point << std::max(max_point.x(), point.x()),
+      std::max(max_point.y(), point.y());
   }
-  return cluster_center / static_cast<float>(_points.size());
+  cluster_ /= static_cast<float>(_points.size());
+  float dis_x = max_point.x() - min_point.x();
+  float dis_y = max_point.y() - min_point.y();
+  cluster_.w() = sqrt(dis_x * dis_x + dis_y * dis_y);
+  return cluster_;
+}
+
+bool Cloud::IsClustersOutside(const Pose& pose, 
+          const float& width, const float& length) const
+{
+  // fprintf(stderr, "x:%f, y:%f, yaw:%f\n", pose.x(), pose.y(), pose.theta());
+  Eigen::Vector2f cloudxy = ComputePointCenterXY();
+  if(abs(cloudxy.x() * cosf(pose.theta())) > pose.x())
+  {
+    return true;
+  }
+  if(abs(cloudxy.x() * cosf(pose.theta())) > width - pose.x())
+  {
+    return true;
+  }
+  if(abs(cloudxy.y() * sinf(pose.theta())) > length)
+  {
+    return true;
+  }
+  if(abs(cloudxy.y() * sinf(pose.theta())) > length - pose.y())
+  {
+    return true;
+  }
+  return false;
 }
 
 // this code will be only there if we use pcl
