@@ -28,7 +28,7 @@
 
 #include "utils/pose.h"
 
-extern bool is_mid360_custom_msg;
+extern bool is_livox_custom_msg;
 extern bool is_use_odometry;
 extern bool is_mid360_tf;
 extern float lidar2robot_x;
@@ -124,7 +124,7 @@ void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar)
     }
     else if(mylidar == "livox")
     { 
-      if(is_mid360_custom_msg)
+      if(is_livox_custom_msg)
       {
 
         _subscriber_clouds_custom = new Subscriber<CustomMsgT>(
@@ -159,7 +159,7 @@ void CloudOdomRosSubscriber::StartListeningToRos(const std::string mylidar)
     }
     else if(mylidar == "livox")
     { 
-      if(is_mid360_custom_msg)
+      if(is_livox_custom_msg)
       {
         _subscriber_clouds_custom = new Subscriber<CustomMsg>(
           *_node_handle, _topic_clouds, _msg_queue_size);

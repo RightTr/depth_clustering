@@ -225,7 +225,7 @@ std::unique_ptr<ProjectionParams> ProjectionParams::MID_360() //TODO:MID_360() d
 std::unique_ptr<ProjectionParams> ProjectionParams::HAP_144()
 {
   auto params = ProjectionParams();
-  params.SetSpan(SpanParams(-60_deg, 60_deg, 1300),
+  params.SetSpan(SpanParams(-60_deg, 60_deg, 400),
                  SpanParams::Direction::HORIZONTAL);
   params.SetSpan(SpanParams(0_deg, 25_deg, 144),
                  SpanParams::Direction::VERTICAL);

@@ -22,9 +22,12 @@
 #define SRC_GROUND_REMOVAL_DEPTH_GROUND_REMOVER_H_
 
 #include <opencv2/opencv.hpp>
+#include <string>
 
 #include <algorithm>
+#include "ros_bridge/parameters.h"
 
+#include <ros/package.h>
 #include "communication/abstract_client.h"
 #include "communication/abstract_sender.h"
 #include "projections/projection_params.h"
@@ -67,7 +70,7 @@ class DepthGroundRemover : public AbstractClient<Cloud>,
    */
   void OnNewObjectReceived(const Cloud& cloud, const int sender_id) override;
 
- protected:
+  protected:
   /**
    * @brief      Zero out all pixels that belong to ground
    *
