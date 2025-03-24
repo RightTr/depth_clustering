@@ -102,6 +102,8 @@ class Cloud {
 
   float ComputeDistance2DMax() const;
 
+  float ComputeAspectRatio() const;
+
   Eigen::Vector2f ComputePointCenterXY() const;
 
   Eigen::Vector4f ComputeClusterCenterRadius() const;

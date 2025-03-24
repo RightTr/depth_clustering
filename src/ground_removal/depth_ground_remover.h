@@ -27,7 +27,6 @@
 #include <algorithm>
 #include "ros_bridge/parameters.h"
 
-#include <ros/package.h>
 #include "communication/abstract_client.h"
 #include "communication/abstract_sender.h"
 #include "projections/projection_params.h"

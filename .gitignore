@@ -32,3 +32,5 @@
 notebooks/.ipynb_checkpoints/*
 
 .vscode
+
+/images/depth_images/*

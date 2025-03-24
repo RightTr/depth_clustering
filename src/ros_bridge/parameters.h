@@ -7,6 +7,7 @@ using std::string;
 extern float centerz_threshold;
 extern float dis2d_max_threshold;
 extern float dis2d_min_threshold;
+extern float aspect_ratio;
 extern int min_cluster_size;
 extern int max_cluster_size;
 extern int smooth_window_size;

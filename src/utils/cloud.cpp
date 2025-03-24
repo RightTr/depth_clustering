@@ -140,6 +140,35 @@ float Cloud::ComputeDistance2DMax() const //TODO:ComputeDistanceMax
   return sqrt(dis_x * dis_x + dis_y + dis_y);
 }
 
+float Cloud::ComputeAspectRatio() const
+{
+  Eigen::Vector2f max_point(std::numeric_limits<float>::lowest(),
+                            std::numeric_limits<float>::lowest());
+  Eigen::Vector2f min_point(std::numeric_limits<float>::max(),
+                            std::numeric_limits<float>::max());
+  Eigen::Vector2f extent = Eigen::Vector2f::Zero();
+  for (const auto& point : _points) 
+  {
+    min_point << std::min(min_point.x(), point.x()),
+      std::min(min_point.y(), point.y());
+    max_point << std::max(max_point.x(), point.x()),
+      std::max(max_point.y(), point.y());
+  }
+  if((max_point.x() > min_point.x()) && (max_point.y() > min_point.y()))
+  {
+    extent = max_point - min_point;
+  }
+  float ratio = extent.x() / extent.y();
+  if(ratio > 1)
+  {
+    return ratio;
+  }
+  else
+  {
+    return 1 / ratio;
+  }
+}
+
 Eigen::Vector4f Cloud::ComputeClusterCenterRadius() const
 {
   Eigen::Vector4f cluster_ = Eigen::Vector4f::Zero();

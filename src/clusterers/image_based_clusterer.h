@@ -49,6 +49,7 @@ extern float dis2d_min_threshold;
 extern float space_width;
 extern float space_length;
 extern bool is_use_odometry;
+extern float aspect_ratio;
 
 namespace depth_clustering {
 
@@ -169,6 +170,10 @@ class ImageBasedClusterer : public AbstractClusterer {
         }
         if(cluster.ComputeDistance2DMax() > dis2d_max_threshold || 
           cluster.ComputeDistance2DMax() < dis2d_min_threshold)
+        {
+          labels_to_erase.push_back(kv.first);
+        }
+        if(cluster.ComputeAspectRatio() > aspect_ratio)
         {
           labels_to_erase.push_back(kv.first);
         }
