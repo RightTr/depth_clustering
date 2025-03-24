@@ -20,6 +20,7 @@
 
 add_library(ground_remove SHARED depth_ground_remover.cpp)
 target_link_libraries(ground_remove
+                      ros_bridge
                       identifiable
                       velodyne_utils
                       difference

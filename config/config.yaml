@@ -1,14 +1,14 @@
 depth_clustering:
-  centerz_threshold: 0.5
+  centerz_threshold: 1.5
   dis2d_max_threshold: 1.5
-  dis2d_min_threshold: 1
-  min_cluster_size: 150
-  max_cluster_size: 1000
+  dis2d_min_threshold: 0.5
+  min_cluster_size: 50
+  max_cluster_size: 2000
   smooth_window_size: 7
   ground_remove_angle_d: 10
 
 lidar:
-  is_mid360_custom_msg: false
+  is_livox_custom_msg: true
 
 odometry:
   is_use_odometry: false
@@ -22,4 +22,5 @@ topic:
   odom_topic: "/aft_mapped_to_init"
   lidar_topic: "/livox/lidar"
 
-
+save_depth_images:
+  save_en: false

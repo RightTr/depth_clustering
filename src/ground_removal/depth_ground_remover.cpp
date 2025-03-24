@@ -31,6 +31,8 @@
 #include "utils/timer.h"
 #include "utils/velodyne_utils.h"
 
+extern bool is_save_depth_images;
+
 namespace depth_clustering {
 
 using cv::DataType;
@@ -50,7 +52,7 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int) { //
     return;
   }
   Cloud cloud_copy(cloud);
-  const cv::Mat& depth_image =
+  cv::Mat depth_image =
       RepairDepth(cloud.projection_ptr()->depth_image(), 5, 1.0f);
   Timer total_timer;
   auto angle_image = CreateAngleImage(depth_image);
@@ -60,6 +62,18 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int) { //
   fprintf(stderr, "INFO: Ground removed in %lu us\n", total_timer.measure());
   cloud_copy.projection_ptr()->depth_image() = no_ground_image; //Remove ground
   cloud_copy.pose() = cloud.pose();
+  if(is_save_depth_images)
+  {
+    std::string depth_images_path = "/home/right/depth_clustering_ws/src/depth_clustering/images/depth_images/frame_" + std::to_string(_counter) + ".png";
+    if(!cv::imwrite(depth_images_path, depth_image))
+    {
+      std::cout << "Save image size: " << depth_image.size() << std::endl;
+    }
+    else
+    {
+      fprintf(stderr, "Save depth_image failed!\n");
+    }
+  }
   this->ShareDataWithAllClients(cloud_copy);
   _counter++;
 }
