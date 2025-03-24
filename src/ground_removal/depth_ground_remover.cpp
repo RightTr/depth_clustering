@@ -64,7 +64,7 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud, const int) { //
   cloud_copy.pose() = cloud.pose();
   if(is_save_depth_images)
   {
-    std::string depth_images_path = "/home/right/depth_clustering_ws/src/depth_clustering/images/depth_images/frame_" + std::to_string(_counter) + ".png";
+    std::string depth_images_path = "/home/nf/depth_clustering_ws/src/depth_clustering/images/depth_images/frame_" + std::to_string(_counter) + ".png";
     if(!cv::imwrite(depth_images_path, depth_image))
     {
       std::cout << "Save image size: " << depth_image.size() << std::endl;
